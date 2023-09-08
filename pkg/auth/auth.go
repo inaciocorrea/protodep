@@ -1,11 +1,11 @@
-package helper
+package auth
 
 import (
 	"fmt"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
 type authMethod string
@@ -17,8 +17,8 @@ const (
 )
 
 type authOptions struct {
-	method   authMethod
-	pemFile  string
+	method  authMethod
+	pemFile string
 	username string
 	password string
 }

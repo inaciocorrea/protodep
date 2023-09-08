@@ -1,12 +1,11 @@
-package dependency
+package config
 
 import (
-	"io/ioutil"
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
-	"github.com/pkg/errors"
 )
 
 type Dependency interface {
@@ -15,17 +14,17 @@ type Dependency interface {
 }
 
 type DependencyImpl struct {
-	targetDir   string
-	tomlpath    string
-	lockpath    string
+	targetDir string
+	tomlPath    string
+	lockPath    string
 	forceUpdate bool
 }
 
 func NewDependency(targetDir string, forceUpdate bool) Dependency {
 	return &DependencyImpl{
 		targetDir:   targetDir,
-		tomlpath:    filepath.Join(targetDir, "protodep.toml"),
-		lockpath:    filepath.Join(targetDir, "protodep.lock"),
+		tomlPath:    filepath.Join(targetDir, "protodep.toml"),
+		lockPath:    filepath.Join(targetDir, "protodep.lock"),
 		forceUpdate: forceUpdate,
 	}
 }
@@ -34,25 +33,30 @@ func (d *DependencyImpl) Load() (*ProtoDep, error) {
 
 	var targetConfig string
 	if d.IsNeedWriteLockFile() {
-		targetConfig = d.tomlpath
+		targetConfig = d.tomlPath
 	} else {
-		targetConfig = d.lockpath
+		targetConfig = d.lockPath
 	}
 
-	content, err := ioutil.ReadFile(targetConfig)
+	content, err := os.ReadFile(targetConfig)
 	if err != nil {
-		return nil, errors.Wrapf(err, "load %s is failed", targetConfig)
+		return nil, fmt.Errorf("load %s: %w", targetConfig, err)
 	}
 
 	var conf ProtoDep
 	if _, err := toml.Decode(string(content), &conf); err != nil {
-		return nil, errors.Wrap(err, "decode toml is failed")
+		return nil, fmt.Errorf( "decode toml: %w", err)
 	}
+
+	if err := conf.Validate(); err != nil {
+		return nil, fmt.Errorf( "found invalid configuration: %w", err)
+	}
+
 	return &conf, nil
 }
 
 func (d *DependencyImpl) hasLockFile() bool {
-	_, err := os.Stat(d.lockpath)
+	_, err := os.Stat(d.lockPath)
 	return err == nil
 }
 

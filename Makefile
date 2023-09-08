@@ -42,6 +42,7 @@ build-all: tidy vendor
 		$(call build-artifact,linux,arm,$(APP))
 		$(call build-artifact,linux,arm64,$(APP))
 		$(call build-artifact,darwin,amd64,$(APP))
+		$(call build-artifact,darwin,arm64,$(APP))
 		$(call build-artifact,windows,amd64,$(APP).exe)
 
 .PHONY: clean
@@ -53,3 +54,8 @@ clean:
 .PHONY: test
 test:
 	go test -v ./...
+
+.PHONY: update-credits
+update-credits:
+	@go install github.com/Songmu/gocredits/cmd/gocredits@latest
+	@gocredits . > CREDITS
